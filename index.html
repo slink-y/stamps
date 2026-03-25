@@ -402,11 +402,14 @@
 
     /* ─── PASS VIEW (fullscreen) ─── */
     #view-pass {
-      background: #000 center / cover no-repeat;
+      background: #000 top left / 100% 100% no-repeat;
       position: relative;
     }
 
     #view-pass.active {
+      min-height: 0; /* override .view's min-height:100vh — on iOS 100vh can
+                        exceed the physical screen, pushing the container taller
+                        than inset:0 and clipping the bottom of the image */
       position: fixed;
       inset: 0;
       z-index: 1000;
