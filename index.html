@@ -407,11 +407,12 @@
     }
 
     #view-pass.active {
-      min-height: 0; /* override .view's min-height:100vh — on iOS 100vh can
-                        exceed the physical screen, pushing the container taller
-                        than inset:0 and clipping the bottom of the image */
+      min-height: 0;
       position: fixed;
-      inset: 0;
+      top: 0;
+      left: 0;
+      width: 100%;
+      /* height is set by JS via window.visualViewport to get the true screen height */
       z-index: 1000;
       overscroll-behavior: none;
       touch-action: none;
@@ -746,12 +747,18 @@
     currentPassId = id;
     const pass = await dbGet(id);
     if (!pass) { showView('home'); return; }
-    document.getElementById('view-pass').style.backgroundImage = `url(${pass.imageData})`;
+
+    // Use visualViewport.height for the true physical screen height on iOS.
+    // CSS `bottom:0` on a fixed element stops at the safe-area boundary, not
+    // the physical bottom, so we set height explicitly from JS instead.
+    const el = document.getElementById('view-pass');
+    const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+    el.style.height = vh + 'px';
+    el.style.backgroundImage = `url(${pass.imageData})`;
 
     lockScroll();
 
     // Try native fullscreen on platforms that support it (non-iOS)
-    const el = document.getElementById('view-pass');
     try {
       if (el.requestFullscreen) await el.requestFullscreen();
       else if (el.webkitRequestFullscreen) await el.webkitRequestFullscreen();
@@ -760,7 +767,9 @@
 
   // Exit fullscreen and return home
   function exitPass() {
-    document.getElementById('view-pass').style.backgroundImage = '';
+    const el = document.getElementById('view-pass');
+    el.style.height = '';
+    el.style.backgroundImage = '';
     unlockScroll();
     try {
       if (document.fullscreenElement || document.webkitFullscreenElement) {
