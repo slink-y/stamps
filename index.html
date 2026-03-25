@@ -34,6 +34,12 @@
       overflow-x: hidden;
     }
 
+    /* When the pass is open, paint the html element black so the safe-area
+       strips (home indicator, status bar) match the pass background. */
+    html.pass-open {
+      background: #000;
+    }
+
     /* ─── VIEWS ─── */
     .view { display: none; min-height: 100vh; }
     .view.active { display: flex; flex-direction: column; }
@@ -732,12 +738,14 @@
     document.body.style.top = `-${_scrollLockY}px`;
     document.body.style.width = '100%';
     document.body.style.overflow = 'hidden';
+    document.documentElement.classList.add('pass-open');
   }
   function unlockScroll() {
     document.body.style.position = '';
     document.body.style.top = '';
     document.body.style.width = '';
     document.body.style.overflow = '';
+    document.documentElement.classList.remove('pass-open');
     window.scrollTo(0, _scrollLockY);
   }
 
