@@ -32,20 +32,14 @@
       background: var(--cream);
       color: var(--text);
       overflow-x: hidden;
+      /* Prevent iOS rubber-band overscroll from revealing background color */
+      overscroll-behavior: none;
     }
 
-    /* When the pass is open:
-       - html background: black so safe-area strips match the pass
-       - body: fixed + inset:0 so it fills the viewport and stops iOS bounce
-         (if body is fixed, iOS Safari uses it as the containing block for fixed
-         children, so we must also pin it to the full screen) */
-    html.pass-open {
-      background: #000;
-    }
+    /* When the pass is open, flip the root background to black so the
+       status-bar and home-indicator safe-area strips match the pass. */
+    html.pass-open,
     html.pass-open body {
-      position: fixed;
-      inset: 0;
-      overflow: hidden;
       background: #000;
     }
 
