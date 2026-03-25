@@ -1,0 +1,9 @@
+{
+  "name": "Stamps",
+  "short_name": "Stamps",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "start_url": "/"
+}
