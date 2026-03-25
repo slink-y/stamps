@@ -34,9 +34,18 @@
       overflow-x: hidden;
     }
 
-    /* When the pass is open, paint the html element black so the safe-area
-       strips (home indicator, status bar) match the pass background. */
+    /* When the pass is open:
+       - html background: black so safe-area strips match the pass
+       - body: fixed + inset:0 so it fills the viewport and stops iOS bounce
+         (if body is fixed, iOS Safari uses it as the containing block for fixed
+         children, so we must also pin it to the full screen) */
     html.pass-open {
+      background: #000;
+    }
+    html.pass-open body {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
       background: #000;
     }
 
@@ -730,23 +739,14 @@
   }
 
   // ─── iOS scroll-lock helpers ───
-  // iOS ignores overflow:hidden on body; position:fixed is the only reliable freeze.
-  let _scrollLockY = 0;
+  // Toggling a class on <html> is the most reliable approach on iOS:
+  // it lets CSS handle both the scroll lock and the background colours
+  // together, so there's no frame where the body is partially styled.
   function lockScroll() {
-    _scrollLockY = window.scrollY;
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${_scrollLockY}px`;
-    document.body.style.width = '100%';
-    document.body.style.overflow = 'hidden';
     document.documentElement.classList.add('pass-open');
   }
   function unlockScroll() {
-    document.body.style.position = '';
-    document.body.style.top = '';
-    document.body.style.width = '';
-    document.body.style.overflow = '';
     document.documentElement.classList.remove('pass-open');
-    window.scrollTo(0, _scrollLockY);
   }
 
   // ─── View Pass ───
