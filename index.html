@@ -523,7 +523,7 @@
 
 <!-- ═══ PASS VIEW ═══ -->
 <div class="view" id="view-pass">
-  <button class="pass-close" onclick="showView('home')">✕</button>
+  <button class="pass-close" onclick="exitPass()">✕</button>
   <img id="pass-img-display" alt="Pass" />
   <button class="pass-delete" id="pass-delete-btn" onclick="deleteCurrentPass()">🗑 Delete pass</button>
 </div>
@@ -717,14 +717,44 @@
     const pass = await dbGet(id);
     if (!pass) { showView('home'); return; }
     document.getElementById('pass-img-display').src = pass.imageData;
+
+    // Request true fullscreen
+    const el = document.getElementById('view-pass');
+    try {
+      if (el.requestFullscreen) await el.requestFullscreen();
+      else if (el.webkitRequestFullscreen) await el.webkitRequestFullscreen();
+    } catch {}
   }
+
+  // Exit fullscreen and return home
+  function exitPass() {
+    try {
+      if (document.fullscreenElement || document.webkitFullscreenElement) {
+        if (document.exitFullscreen) document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      }
+    } catch {}
+    showView('home');
+  }
+
+  // If user presses Escape / swipes out of fullscreen, go back to home
+  document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement && document.getElementById('view-pass').classList.contains('active')) {
+      showView('home');
+    }
+  });
+  document.addEventListener('webkitfullscreenchange', () => {
+    if (!document.webkitFullscreenElement && document.getElementById('view-pass').classList.contains('active')) {
+      showView('home');
+    }
+  });
 
   async function deleteCurrentPass() {
     if (!currentPassId) return;
     if (!confirm('Delete this pass?')) return;
     await dbDelete(currentPassId);
     showToast('Pass deleted');
-    showView('home');
+    exitPass();
   }
 
   // ─── Toast ───
