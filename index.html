@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Stamps</title>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
@@ -389,10 +391,23 @@
     /* ─── PASS VIEW (fullscreen) ─── */
     #view-pass {
       background: #000;
-      min-height: 100vh;
       align-items: center;
       justify-content: center;
       position: relative;
+    }
+
+    #view-pass.active {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      /* Fill the full screen including notch/home-indicator areas on iOS */
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+      z-index: 1000;
     }
 
     #pass-img-display {
@@ -406,8 +421,8 @@
 
     .pass-close {
       position: fixed;
-      top: 20px;
-      right: 20px;
+      top: calc(20px + env(safe-area-inset-top));
+      right: calc(20px + env(safe-area-inset-right));
       width: 44px;
       height: 44px;
       border-radius: 50%;
@@ -427,7 +442,7 @@
 
     .pass-delete {
       position: fixed;
-      bottom: 32px;
+      bottom: calc(32px + env(safe-area-inset-bottom));
       left: 50%;
       transform: translateX(-50%);
       background: rgba(232,53,74,0.8);
@@ -718,7 +733,10 @@
     if (!pass) { showView('home'); return; }
     document.getElementById('pass-img-display').src = pass.imageData;
 
-    // Request true fullscreen
+    // Lock body scroll so the pass covers the full screen on iOS
+    document.body.style.overflow = 'hidden';
+
+    // Try native fullscreen on platforms that support it (non-iOS)
     const el = document.getElementById('view-pass');
     try {
       if (el.requestFullscreen) await el.requestFullscreen();
@@ -728,6 +746,7 @@
 
   // Exit fullscreen and return home
   function exitPass() {
+    document.body.style.overflow = '';
     try {
       if (document.fullscreenElement || document.webkitFullscreenElement) {
         if (document.exitFullscreen) document.exitFullscreen();
@@ -737,14 +756,16 @@
     showView('home');
   }
 
-  // If user presses Escape / swipes out of fullscreen, go back to home
+  // On platforms with native fullscreen: if user exits via Escape, go home
   document.addEventListener('fullscreenchange', () => {
     if (!document.fullscreenElement && document.getElementById('view-pass').classList.contains('active')) {
+      document.body.style.overflow = '';
       showView('home');
     }
   });
   document.addEventListener('webkitfullscreenchange', () => {
     if (!document.webkitFullscreenElement && document.getElementById('view-pass').classList.contains('active')) {
+      document.body.style.overflow = '';
       showView('home');
     }
   });
